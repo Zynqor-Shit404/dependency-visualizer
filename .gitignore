@@ -1,0 +1,16 @@
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+
+# Виртуальные окружения
+.venv/
+venv/
+
+# Результаты запуска и тестов
+dependency_graph.png
+.coverage
+
+# Файлы IDE
+.idea/
+.vscode/
