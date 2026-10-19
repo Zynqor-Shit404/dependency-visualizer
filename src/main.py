@@ -1,6 +1,6 @@
 
 "CLI-приложение для этапа 1 варианта 11."
-
+from apk_repository import get_direct_dependencies, RepositoryError
 import argparse
 import re
 import sys
@@ -165,11 +165,30 @@ def main() -> int:
 
             return 1
 
-        # На этапе 1 требуется вывести все настройки.
+
+
+        # Выводим параметры конфигурации
         print_config(config)
+
+        # Получаем и выводим прямые зависимости пакета.
+        dependencies = get_direct_dependencies(
+            config["repository"],
+            config["package_name"],
+            config["package_version"],
+        )
+
+        print("\nПрямые зависимости:")
+        if dependencies:
+            for dependency in dependencies:
+                print(f"- {dependency}")
+        else:
+            print("У пакета нет прямых зависимостей.")
+
         return 0
 
-    except ConfigError as error:
+
+
+    except (ConfigError, RepositoryError) as error:
         print(f"Ошибка: {error}", file=sys.stderr)
         return 1
 
