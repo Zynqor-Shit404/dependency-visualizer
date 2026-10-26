@@ -1,6 +1,6 @@
 
-"CLI-приложение для этапа 1 варианта 11."
-from apk_repository import get_direct_dependencies, RepositoryError
+"CLI-приложение для варианта 11."
+from src.apk_repository import get_direct_dependencies, RepositoryError
 import argparse
 import re
 import sys
@@ -8,8 +8,14 @@ from pathlib import Path
 from urllib.parse import urlparse
 import xml.etree.ElementTree as ET
 
-
-
+# импортирую и подключаю граф
+from src.apk_repository import (
+    RepositoryError,
+    get_direct_dependencies,
+    load_alpine_repository,
+    load_test_repository,
+)
+from src.dependency_graph import build_graph, find_reverse_dependencies
 # Все параметры, которые должны быть в XML.
 REQUIRED_FIELDS = (
     "package_name",
@@ -170,25 +176,34 @@ def main() -> int:
         # Выводим параметры конфигурации
         print_config(config)
 
-        # Получаем и выводим прямые зависимости пакета.
-        dependencies = get_direct_dependencies(
-            config["repository"],
+        # Загружаем зависимости из тестового или реального репозитория.
+        if config["test_mode"].lower() == "true":
+            repository_graph = load_test_repository(config["repository"])
+        else:
+            repository_graph = load_alpine_repository(config["repository"])
+
+        # Строим граф транзитивных зависимостей.
+        graph = build_graph(
+            repository_graph,
             config["package_name"],
-            config["package_version"],
+            config["package_filter"],
         )
 
-        print("\nПрямые зависимости:")
-        if dependencies:
-            for dependency in dependencies:
-                print(f"- {dependency}")
+        # Выводим полученный граф.
+        print("\nГраф зависимостей:")
+
+        if not graph:
+            print("Граф пуст: пакет исключён фильтром или отсутствует.")
         else:
-            print("У пакета нет прямых зависимостей.")
+            for package, dependencies in sorted(graph.items()):
+                deps = ", ".join(dependencies) if dependencies else "(нет)"
+                print(f"{package} -> {deps}")
 
         return 0
 
 
 
-    except (ConfigError, RepositoryError) as error:
+    except (ConfigError, RepositoryError, ValueError) as error:
         print(f"Ошибка: {error}", file=sys.stderr)
         return 1
 

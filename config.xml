@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
-    <package_name>asterisk-curl</package_name>
-    <repository>https://dl-cdn.alpinelinux.org/alpine/v3.20/main/x86_64</repository>
-    <test_mode>false</test_mode>
-    <package_version>20.9.3-r1</package_version>
+    <package_name>A</package_name>
+    <repository>test_repository.txt</repository>
+    <test_mode>true</test_mode>
+    <package_version>1.0.0</package_version>
     <output_image>dependency_graph.png</output_image>
-    <package_filter></package_filter>
+    <package_filter>C</package_filter>
 </config>
+
