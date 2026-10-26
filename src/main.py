@@ -1,6 +1,6 @@
 
 "CLI-приложение для варианта 11."
-from src.apk_repository import get_direct_dependencies, RepositoryError
+
 import argparse
 import re
 import sys
@@ -155,6 +155,12 @@ def main() -> int:
         default="config.xml",
         help="Путь к XML-файлу конфигурации",
     )
+
+    parser.add_argument(
+        "--reverse",
+        metavar="PACKAGE",
+        help="Вывести обратные зависимости указанного пакета",
+    )
     args = parser.parse_args()
 
     # Обрабатываем ошибки чтения и проверки конфигурации.
@@ -198,6 +204,21 @@ def main() -> int:
             for package, dependencies in sorted(graph.items()):
                 deps = ", ".join(dependencies) if dependencies else "(нет)"
                 print(f"{package} -> {deps}")
+
+        # Этап 4: показываем пакеты, зависящие от выбранного.
+        if args.reverse:
+            reverse_dependencies = find_reverse_dependencies(
+                graph,
+                args.reverse,
+            )
+
+            print(f"\nОбратные зависимости пакета {args.reverse}:")
+
+            if reverse_dependencies:
+                for package in reverse_dependencies:
+                    print(f"- {package}")
+            else:
+                print("Обратные зависимости не найдены.")
 
         return 0
 
